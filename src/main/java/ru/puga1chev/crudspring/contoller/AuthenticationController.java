@@ -2,20 +2,20 @@ package ru.puga1chev.crudspring.contoller;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import ru.puga1chev.crudspring.entity.*;
 import ru.puga1chev.crudspring.service.*;
-
-import java.util.List;
+import javax.servlet.http.*;
 
 @Controller
-public class MainController {
+public class AuthenticationController {
 
-
-    private final static Logger logger = Logger.getLogger(MainController.class);
+    private final static Logger logger = Logger.getLogger(AuthenticationController.class);
 
     @Autowired
     private ObjectService<User> userService;
@@ -38,14 +38,12 @@ public class MainController {
         return modelAndView;
     }
 
-    @RequestMapping(value = "/admin/users", method = RequestMethod.GET)
-    public ModelAndView UsersViewPage() {
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("users_view");
-
-        List<User> users = userService.getAll("id");
-        modelAndView.addObject("users", users);
-
-        return modelAndView;
+    @RequestMapping(value="/logout", method = RequestMethod.GET)
+    public String logoutPage (HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null){
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+        return "redirect:/login?logout=true";
     }
 }

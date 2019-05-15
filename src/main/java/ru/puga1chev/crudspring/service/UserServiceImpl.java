@@ -6,6 +6,7 @@ import ru.puga1chev.crudspring.dao.BaseDaoOperations;
 import ru.puga1chev.crudspring.entity.User;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserServiceImpl implements ObjectService<User> {
@@ -16,6 +17,11 @@ public class UserServiceImpl implements ObjectService<User> {
     @Override
     public List<User> getAll(String orderByField) {
         return dao.getAll(orderByField);
+    }
+
+    @Override
+    public Map<String, String> getAllAsMap() {
+        return null;
     }
 
     @Override

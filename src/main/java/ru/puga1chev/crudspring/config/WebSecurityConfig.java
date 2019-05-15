@@ -10,25 +10,38 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import ru.puga1chev.crudspring.handler.UrlAuthenticationSuccessHandler;
+import ru.puga1chev.crudspring.service.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity(debug = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth)
             throws Exception {
 
-                auth.inMemoryAuthentication()
-                    .withUser("admin")
-                    .password("{noop}admin")
-                    .roles("ADMIN")
-                .and()
-                        .withUser("user")
-                        .password("{noop}user")
-                        .roles("USER");
+        auth
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(NoOpPasswordEncoder.getInstance());
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler myAuthenticationSuccessHandler(){
+        return new UrlAuthenticationSuccessHandler();
     }
 
     @Override
@@ -38,14 +51,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                     .antMatchers("/resources/**", "/login", "/").permitAll()
                     .antMatchers("/admin/**").hasRole("ADMIN")
+                    .antMatchers("/user").hasAnyRole("USER", "ADMIN")
                     .anyRequest().authenticated()
                     .and()
                 .formLogin()
                     .loginPage("/login").usernameParameter("login").passwordParameter("password")
-                    .defaultSuccessUrl("/admin/users",true)
+                    .successHandler(myAuthenticationSuccessHandler())
                     .failureUrl("/login?error")
                     .permitAll()
                 .and()
-                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());//disable();
+                .logout()
+                    .logoutSuccessUrl("/login")
+                    .invalidateHttpSession(true)
+                    .permitAll()
+                .and()
+                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
     }
 }

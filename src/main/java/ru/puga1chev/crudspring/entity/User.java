@@ -5,8 +5,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -22,7 +24,7 @@ public class User implements UserDetails {
     private String login;
     @Column(name = "pass", unique = false, updatable = true)
     private String pass;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
@@ -47,7 +49,9 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+        List<SimpleGrantedAuthority> roles = new ArrayList<>();
+        getRoles().stream().forEach(x -> roles.add(new SimpleGrantedAuthority(x.getAuthority())));
+        return roles;
     }
 
     @Override
@@ -56,7 +60,7 @@ public class User implements UserDetails {
     }
 
     public String getUsername() {
-        return getLogin();
+        return username;
     }
 
     @Override

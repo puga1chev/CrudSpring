@@ -40,7 +40,7 @@ public class HibernateConfig {
     public LocalSessionFactoryBean sessionFactory() {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(dataSource());
-        sessionFactory.setPackagesToScan("CrudSpring1.entity");
+        sessionFactory.setPackagesToScan("ru.puga1chev.crudspring.entity");
         sessionFactory.setHibernateProperties(hibernateProperties());
         return sessionFactory;
     }

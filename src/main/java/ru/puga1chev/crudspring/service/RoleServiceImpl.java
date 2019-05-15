@@ -45,19 +45,19 @@ public class RoleServiceImpl implements ObjectService<Role> {
         return dao.getByField(fieldName, value);
     }
 
-    public static Role getRole(ObjectService<Role> roleService, String rolename) {
-        Role role = roleService.getByField("rolename", rolename);
+/*    public Role getRole(String rolename) {
+        Role role = getByField("rolename", rolename);
 
         if (role == null) {
             role = new Role(0L, rolename);
-            roleService.insert(role);
+            insert(role);
         }
         return role;
-    }
+    }*/
 
-    public static Map<String, String> getRolesAsMap(ObjectService<Role> roleService) {
+    public Map<String, String> getAllAsMap() {
         Map<String, String> roles = new HashMap<>();
-        roleService.getAll("id").stream().forEach(x -> roles.put(x.getId().toString(), x.getRolename()));
+        getAll("id").forEach(x -> roles.put(x.getId().toString(), x.getRolename()));
         return roles;
     }
 }
